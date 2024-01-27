@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  {% import '_macros.html' as macros %}
+
+  <form action="">
+    <input type="text" />
+    {{ macros.render_input('Apaterno', 'Apaterno') }}
+    {{ macros.render_input('Correo', 'Correo','email') }}
+  </form>
+{% endblock %}
