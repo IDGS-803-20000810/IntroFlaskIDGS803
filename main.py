@@ -1,6 +1,28 @@
-from flask import Flask, request, render_template
+
+from flask import Flask, request, render_template, Response, g, redirect
+from flask_wtf.csrf import CSRFProtect
+import forms
+
 
 app=Flask(__name__)
+app.secret_key='esta es la clave secreta'
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'),404
+
+@app.before_request
+def before_request():
+    g.nombre='Daniel'
+    # g.nombre='Daniel'
+    print('before_request')
+    
+@app.after_request
+def after_request(response):
+    print('ultimo')
+    if 'Daniel' not in g.nombre and request.endpoint not in ['index']:
+        return redirect('index.html')
+    return response
 
 @app.route("/")
 def index():
@@ -8,9 +30,28 @@ def index():
     alumnos=["Mario","Pedro","Luis","Dario"]
     return render_template("index.html",escuela=escuela,alumnos=alumnos)
 
-@app.route("/alumnos")
+@app.route("/alumnos",methods=["GET","POST"])
 def alum():
-    return render_template("alumnos.html")
+    
+    print("Dentro de alumnos")
+    print("Hola {}".format(g.nombre))
+    nom=""
+    apaterno=""
+    amaterno=""
+    alum_form = forms.UsersForm(request.form)
+    if request.method == 'POST' and alum_form.validate():
+        nom=alum_form.nombre.data
+        apaterno=alum_form.apaterno.data
+        amaterno=alum_form.amaterno.data
+        
+        mensaje="Bienvenido {}".format(nom)
+        flash(mensaje)
+        
+        # print("Nombre: {}".format(nom))
+        # print("Apellido Paterno: {}".format(apaterno))
+        # print("Apellido Materno: {}".format(amaterno))
+        
+    return render_template("alumnos.html",form=alum_form, nom=nom, apa=apaterno, ama=amaterno)
 
 @app.route("/maestros")
 def maest():
